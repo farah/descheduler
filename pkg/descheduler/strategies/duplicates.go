@@ -94,8 +94,8 @@ func RemoveDuplicatePods(
 		}
 		listOfPodsOnNode[node] = pods
 		for _, pod := range pods {
-			ownerKeyOfPod := getUniqueOwnerKeyOfPod(pod)
-			ownerKeyCountInCluster[ownerKeyOfPod] += 1
+			ownerKeyOfPod := GetUniqueOwnerKeyOfPod(pod)
+			ownerKeyCountInCluster[ownerKeyOfPod]++
 		}
 	}
 
@@ -105,8 +105,8 @@ func RemoveDuplicatePods(
 		// count of pods on node
 		ownerKeyCountOnNode := map[string]int32{}
 		for _, pod := range pods {
-			ownerKeyOfPod := getUniqueOwnerKeyOfPod(pod)
-			ownerKeyCountOnNode[ownerKeyOfPod] += 1
+			ownerKeyOfPod := GetUniqueOwnerKeyOfPod(pod)
+			ownerKeyCountOnNode[ownerKeyOfPod]++
 		}
 
 		for _, pod := range pods {
@@ -114,7 +114,7 @@ func RemoveDuplicatePods(
 			if hasExcludedOwnerRefKind(ownerRefList, strategy) || len(ownerRefList) == 0 {
 				continue
 			}
-			ownerKeyOfPod := getUniqueOwnerKeyOfPod(pod)
+			ownerKeyOfPod := GetUniqueOwnerKeyOfPod(pod)
 			countInCluster := ownerKeyCountInCluster[ownerKeyOfPod]
 			maxCountOnNode := int32(float64(countInCluster)/float64(len(nodes))) + 1
 			if countOnThisNode := ownerKeyCountOnNode[ownerKeyOfPod]; countOnThisNode > 1 &&
@@ -146,7 +146,8 @@ func hasExcludedOwnerRefKind(ownerRefs []metav1.OwnerReference, strategy api.Des
 	return false
 }
 
-func getUniqueOwnerKeyOfPod(pod *v1.Pod) string {
+// Get unique
+func GetUniqueOwnerKeyOfPod(pod *v1.Pod) string {
 	ownerRefList := podutil.OwnerRef(pod)
 	podContainerKeys := make([]string, 0, len(ownerRefList)*len(pod.Spec.Containers))
 	for _, ownerRef := range ownerRefList {
